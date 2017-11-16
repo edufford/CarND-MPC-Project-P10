@@ -1,0 +1,3 @@
+/Users/student/Udacity/sdcn2/L19 P5 Model Predictive Control Project/MyProject/CarND-MPC-Project-P10/xbuild/CMakeFiles/mpc.dir
+/Users/student/Udacity/sdcn2/L19 P5 Model Predictive Control Project/MyProject/CarND-MPC-Project-P10/xbuild/CMakeFiles/ALL_BUILD.dir
+/Users/student/Udacity/sdcn2/L19 P5 Model Predictive Control Project/MyProject/CarND-MPC-Project-P10/xbuild/CMakeFiles/ZERO_CHECK.dir

@@ -1,108 +1,105 @@
-# CarND-Controls-MPC
-Self-Driving Car Engineer Nanodegree Program
+# **MPC Control Project**
 
----
+**Udacity Self Driving Car Nanodegree - Project #10**
 
-## Dependencies
+2017/11/16
+
+## Overview
+
+This project implements a **Model Predictive Control (MPC)** algorithm in C++ using **Ipopt** optimizer and **CppAD** automatic differentiation libraries to control steering and throttle while driving a simulated vehicle around a track following reference waypoints.
+
+At each timestep, the **vehicle's state** (global position, heading, speed, steering, and throttle) and the **closest six waypoints** are received by the controller.
+
+Before applying the MPC control, the **vehicle's state is estimated after some expected latency** (processing time and ~100ms actuator delay) using the modeled **motion equations (bicycle model)**.
+
+This estimated state position is then used to **convert the waypoints from global to vehicle coordinate systems**.  The waypoints are then preprocessed with **waypoint interpolation** and **weighting** before applying a **3rd order polyfit** to use as the reference driving path.
+
+The polyfit coefficients and estimated vehicle state after latency are then used by the MPC controller to **optimize a planned driving path over ~1 sec horizon**.  The MPC minimizes a cost function based on a target reference speed, the **cross-track error (CTE)**, the **heading error (EPSI)**, minimal use of actuators and smoothness between actuation steps.  Constraints are applied to the model for it to satisfy the motion equations.
+
+The **steering and throttle actuation from the MPC's first step of the planned driving path** are used to drive the actual car at each timestep including the expected latency delay.  The MPC's planned path coordinates are visualized as a green line with the waypoints shown as a yellow line.
+
+## Project Reflection
+
+For more details about the results of this activity, see the [project reflection document](Reflection.md).
+
+<iframe allowFullScreen frameborder="0" height="564" mozallowfullscreen src="https://player.vimeo.com/video/243175608" webkitAllowFullScreen width="640"></iframe>
+
+## Key Files
+
+| File              | Description                                                                                                    |
+|:-----------------:|:--------------------------------------------------------------------------------------------------------------:|
+| /src/main.cpp     | Source code for **main loop** that handles **uWebSockets communication to simulator**                          |
+| /src/MPC.cpp, .h  | Source code for **MPC  algorithm** that controls the steering and throttle to follow reference waypoints along the track |
+| /build/mpc        | Output **executable program binary**                                                                           |
+| [Reflection.md](Reflection.md)     | **Reflection document** describing the MPC tuning activity                                                |
+| install-mac.sh    | Script for Mac to install uWebSocketIO required to interface with simulator                                    |
+| install-ubuntu.sh | Script for Linux to install uWebSocketIO required to interface with simulator                                  |
+
+The original Udacity project repository is [here](https://github.com/udacity/CarND-MPC-Project).
+
+## How to Build and Run Code
+
+This project involves the Udacity Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases)
+
+This repository includes two scripts (**install-mac.sh** and **install-ubuntu.sh**) that can be used to set up and install [uWebSocketIO](https://github.com/uWebSockets/uWebSockets) for either Linux or Mac systems.
+
+Once the install for uWebSocketIO is complete, the main program can be built and run by doing the following from the project top directory.
+
+1. mkdir build
+2. cd build
+3. cmake ..
+4. make
+5. ./mpc
+
+If using Xcode to build, run the following commands:
+
+1. mkdir xbuild
+2. cd xbuild
+3. cmake -G "Xcode" ..
+4. Open "MPC.xcodeproj" in Xcode and build
+5. cd Debug
+6. ./mpc
+
+## Other Important Dependencies
 
 * cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
+  * All OSes: [click here for installation instructions](https://cmake.org/install/)
+
+* make >= 4.1 (Linux, Mac), 3.81 (Windows)
   * Linux: make is installed by default on most Linux distros
   * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
   * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
+
 * gcc/g++ >= 5.4
   * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
+  * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
   * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `install-mac.sh` or `install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
+
+* uWebSockets (see above)
 
 * **Ipopt and CppAD:** Please refer to [this document](https://github.com/udacity/CarND-MPC-Project/blob/master/install_Ipopt_CppAD.md) for installation instructions.
+
 * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page). This is already part of the repo so you shouldn't have to worry about it.
-* Simulator. You can download these from the [releases tab](https://github.com/udacity/self-driving-car-sim/releases).
-* Not a dependency but read the [DATA.md](./DATA.md) for a description of the data sent back from the simulator.
 
+## Communication protocol between uWebSocketIO and Simulator
 
-## Basic Build Instructions
+**INPUT to main.cpp**: values provided by the simulator to the C++ program
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./mpc`.
+* ["ptsx"] => Closest waypoints global x position (m)
+* ["ptsy"] => Closest waypoints global y position (m)
+* ["psi"] => Vehicle's global heading (rad)
+* ["psi_unity"] => Vehicle's global heading in Unity coordinates (rad), not used
+* ["x"] => Vehicle's global x position (m)
+* ["y"] => Vehicle's global y position (m)
+* ["steering_angle"] => Vehicle's last steering angle (rad)
+* ["throttle"] => Vehicle's last throttle (-1 to +1)
+* ["speed"] => Vehicle's last speed (mph)
 
-## Tips
+**OUTPUT from main.cpp**: values provided by the C++ program to the simulator
 
-1. It's recommended to test the MPC on basic examples to see if your implementation behaves as desired. One possible example
-is the vehicle starting offset of a straight line (reference). If the MPC implementation is correct, after some number of timesteps
-(not too many) it should find and track the reference line.
-2. The `lake_track_waypoints.csv` file has the waypoints of the lake track. You could use this to fit polynomials and points and see of how well your model tracks curve. NOTE: This file might be not completely in sync with the simulator so your solution should NOT depend on it.
-3. For visualization this C++ [matplotlib wrapper](https://github.com/lava/matplotlib-cpp) could be helpful.)
-4.  Tips for setting up your environment are available [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
-5. **VM Latency:** Some students have reported differences in behavior using VM's ostensibly a result of latency.  Please let us know if issues arise as a result of a VM environment.
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/b1ff3be0-c904-438e-aad3-2b5379f0e0c3/concepts/1a2255a0-e23c-44cf-8d41-39b8a3c8264a)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+* ["steering_angle"] <= Control value for steering angle (-1 to +1)
+* ["throttle"] <= Control value for throttle (-1 to 1)
+* ["mpc_x"] <= MPC's planned path x coordinates for visualization (green line)
+* ["mpc_y"] <= MPC's planned path y coordinates for visualization (green line)
+* ["next_x"] <= Waypoint x coordinates for visualization (yellow line)
+* ["next_y"] <= Waypoint y coordinates for visualization (yellow line)
