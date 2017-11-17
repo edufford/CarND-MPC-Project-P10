@@ -12,7 +12,7 @@ To do this, the MPC algorithm **optimizes a cost function** to minimize various 
 
 Tuning an MPC controller's cost function is **more indirect and complicated** than a straightforward PID controller, but the resulting driving behavior is more natural.  The MPC optimization calculation also requires **much more processing time** than PID, but **some latency delay can be compensated for** by using the expected motion model equations.  This also makes MPC **more robust to acuator delays** than PID control.
 
-<iframe allowFullScreen frameborder="0" height="564" mozallowfullscreen src="https://player.vimeo.com/video/243175608" webkitAllowFullScreen width="640"></iframe>
+[<img src="./images/MPC_video_screenshot.png" width="800">](https://vimeo.com/243175608)
 
 ### The Model
 
@@ -22,7 +22,7 @@ See the corrected motion model equations below:
 
 <img src="./images/eqn_motion_corrected.png" width="400">
 
-The original CTE equation caused positive CTE in the direction of negative Y values which caused a mismatch where CTE would decrease as car moved away from reference line.  See the example below:
+The original CTE equation caused positive CTE in the direction of negative Y values which caused a mismatch where CTE would decrease as car moved away from reference line.  See the example shown below:
 
 <img src="./images/eqn_motion_example.png" width="900">
 
@@ -69,7 +69,7 @@ However, because of the expected latency, the car will have continued to move fo
 
 To **compensate for this latency and preprocess the waypoints** to polyfit the reference line, the following method was used:
 
-1. **Estimate the car's state after the expected latency** by using the motion model equations described in the previous Model section above.  The latency amount is determined as a **moving average of the controller's measured total latency** calculated by timestamps.  Since the car's velocity and heading are not constant during this latency time, use the predicted **average velocity and heading over the latency time period to estimate the new x, y position**.
+1. **Estimate the car's state after the expected latency** by using the motion model equations described in the previous [Model section](#The-Model) above.  The latency amount is determined as a **moving average of the controller's measured total latency** calculated by timestamps.  Since the car's velocity and heading are not constant during this latency time, use the predicted **average velocity and heading over the latency time period to estimate the new x, y position**.
 
 2. **Convert the waypoints from global to vehicle coordinates** at the vehicle's estimated position from step 1.
 
@@ -80,9 +80,11 @@ To **compensate for this latency and preprocess the waypoints** to polyfit the r
 The reason for the step #3 waypoint interpolation and polyfit weighting is shown in the figures below:
 
 <img src="./images/Waypoints_Before.png" width="600">
+
 *Figure 1 - Example polyfit BEFORE waypoint interpolation/weighting where reference line curves away from car to follow the curvature farther down the road*
 
 <img src="./images/Waypoints_After.png" width="600">
+
 *Figure 2 - Example polyfit AFTER waypoint interpolation/weighting where reference line stays closer to the car for improved control accuracy and stability*
 
 After setting the reference line, the MPC controller is passed the car's state (estimated after the latency) and the reference line polynomial coefficients to plan the driving path.
@@ -93,7 +95,7 @@ The MPC algorithm is implemented using the Ipopt and CppAD C++ libraries.  A cos
 
 Once the solver plans the driving path, only the first step actuations are actually sent back to the simulator to drive the car at each loop.  However, the optimization should result in a similar optimized driving path at each step so it can maintain smooth driving control overall.
 
-The key to the MPC's performance is the cost function which includes the following cost terms to be minimized:
+The key to the MPC's performance is the **cost function** which includes the following cost terms to be minimized:
 
 1. **Basic CTE** - to get car to follow the line
 
@@ -109,7 +111,7 @@ The key to the MPC's performance is the cost function which includes the followi
 
 7. **Change in sequential throttle (acceleration) actuations** - to smooth out changes in acceleration/braking
 
-The model can compensate well for the expected 100 ms actuator latency using the state estimation method described in the previous MPC preprocessing section above, but in order for the motion model equations to be accurate, the steering needs to stay within the region of stable tire dynamics that are not included in the equations.  Because of this, the cost term #5 for absolute steering angle is heavily weighted to keep steering angles as small as possible.
+The model can compensate well for the expected 100ms actuator latency using the state estimation method described in the previous [MPC preprocessing section](#Polynomial-Fitting-and-MPC-Preprocessing) above, but in order for the motion model equations to be accurate, the steering needs to stay within the region of stable tire dynamics that are not included in the equations.  Because of this, the cost term #5 for absolute steering angle is heavily weighted to keep steering angles as small as possible.
 
 ## Simulation Result
 
@@ -117,9 +119,19 @@ Data from the simulation result of the MPC controller is shown below:
 
 <img src="./images/Plot_XY.png" width="900">
 
+*Figure 3 - Simulation result plot for car's position vs waypoints on the track*
+
 <img src="./images/Plot_Speed.png" width="900">
+
+*Figure 4 - Simulation result plot for vehicle speed*
+
 <img src="./images/Plot_Steer_Throttle.png" width="900">
+
+*Figure 5 - Simulation result plots for steering angle and throttle*
+
 <img src="./images/Plot_CTE_EPSI.png" width="900">
+
+*Figure 6 - Simulation result plots for CTE and EPSI error amounts*
 
 The MPC controller is able to keep a **good driving line** with **smooth steering** and achieves a **peak speed of 110 mph**!  It is also able to stay between 90-110 mph for each lap.
 

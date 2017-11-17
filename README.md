@@ -22,7 +22,7 @@ The **steering and throttle actuation from the MPC's first step of the planned d
 
 For more details about the results of this activity, see the [project reflection document](Reflection.md).
 
-<iframe allowFullScreen frameborder="0" height="564" mozallowfullscreen src="https://player.vimeo.com/video/243175608" webkitAllowFullScreen width="640"></iframe>
+[<img src="./images/MPC_video_screenshot.png" width="800">](https://vimeo.com/243175608)
 
 ## Key Files
 
@@ -98,7 +98,7 @@ If using Xcode to build, run the following commands:
 **OUTPUT from main.cpp**: values provided by the C++ program to the simulator
 
 * ["steering_angle"] <= Control value for steering angle (-1 to +1)
-* ["throttle"] <= Control value for throttle (-1 to 1)
+* ["throttle"] <= Control value for throttle (-1 to +1)
 * ["mpc_x"] <= MPC's planned path x coordinates for visualization (green line)
 * ["mpc_y"] <= MPC's planned path y coordinates for visualization (green line)
 * ["next_x"] <= Waypoint x coordinates for visualization (yellow line)
