@@ -69,7 +69,7 @@ However, because of the expected latency, the car will have continued to move fo
 
 To **compensate for this latency and preprocess the waypoints** to polyfit the reference line, the following method was used:
 
-1. **Estimate the car's state after the expected latency** by using the motion model equations described in the previous [Model section](#The-Model) above.  The latency amount is determined as a **moving average of the controller's measured total latency** calculated by timestamps.  Since the car's velocity and heading are not constant during this latency time, use the predicted **average velocity and heading over the latency time period to estimate the new x, y position**.
+1. **Estimate the car's state after the expected latency** by using the motion model equations described in the previous [Model section](#the-model) above.  The latency amount is determined as a **moving average of the controller's measured total latency** calculated by timestamps.  Since the car's velocity and heading are not constant during this latency time, use the predicted **average velocity and heading over the latency time period to estimate the new x, y position**.
 
 2. **Convert the waypoints from global to vehicle coordinates** at the vehicle's estimated position from step 1.
 
@@ -111,7 +111,7 @@ The key to the MPC's performance is the **cost function** which includes the fol
 
 7. **Change in sequential throttle (acceleration) actuations** - to smooth out changes in acceleration/braking
 
-The model can compensate well for the expected 100ms actuator latency using the state estimation method described in the previous [MPC preprocessing section](#Polynomial-Fitting-and-MPC-Preprocessing) above, but in order for the motion model equations to be accurate, the steering needs to stay within the region of stable tire dynamics that are not included in the equations.  Because of this, the cost term #5 for absolute steering angle is heavily weighted to keep steering angles as small as possible.
+The model can compensate well for the expected 100ms actuator latency using the state estimation method described in the previous [MPC preprocessing section](#polynomial-fitting-and-mpc-preprocessing) above, but in order for the motion model equations to be accurate, the steering needs to stay within the region of stable tire dynamics that are not included in the equations.  Because of this, the cost term #5 for absolute steering angle is heavily weighted to keep steering angles as small as possible.
 
 ## Simulation Result
 
